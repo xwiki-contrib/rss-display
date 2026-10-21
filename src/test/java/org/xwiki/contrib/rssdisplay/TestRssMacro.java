@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.rssdisplay;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.rendering.block.Block;
+import org.xwiki.contrib.rssdisplay.internal.DefaultRomeFeedFactory;
 import org.xwiki.contrib.rssdisplay.internal.RssMacro;
 import org.xwiki.rendering.macro.MacroExecutionException;
 import org.xwiki.rendering.transformation.MacroTransformationContext;
@@ -42,6 +44,23 @@ import org.xwiki.rendering.transformation.MacroTransformationContext;
 @Singleton
 public class TestRssMacro extends RssMacro
 {
+    /**
+     * The test feeds are read from the classpath, which the default factory refuses to do.
+     */
+    public TestRssMacro()
+    {
+        setFeedFactory(new DefaultRomeFeedFactory()
+        {
+            @Override
+            protected void checkURL(URL url) throws MacroExecutionException, IOException
+            {
+                if (!"file".equals(url.getProtocol())) {
+                    super.checkURL(url);
+                }
+            }
+        });
+    }
+
     @Override
     public List<Block> execute(RssMacroParameters parameters, String content, MacroTransformationContext context)
         throws MacroExecutionException
