@@ -1,0 +1,69 @@
+.runTransformations
+.#-----------------------------------------------------
+.input|xwiki/2.0
+.# Verify that at most 10 items are displayed by default.
+.#-----------------------------------------------------
+{{testrss feed="file://feed6.xml" decoration="false"/}}
+.#-----------------------------------------------------
+.expect|event/1.0
+.#-----------------------------------------------------
+beginDocument
+beginMacroMarkerStandalone [testrss] [feed=file://feed6.xml|decoration=false]
+beginGroup [[class]=[rssfeed]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item1]] [true]
+onWord [Item1]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item1]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item2]] [true]
+onWord [Item2]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item2]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item3]] [true]
+onWord [Item3]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item3]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item4]] [true]
+onWord [Item4]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item4]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item5]] [true]
+onWord [Item5]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item5]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item6]] [true]
+onWord [Item6]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item6]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item7]] [true]
+onWord [Item7]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item7]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item8]] [true]
+onWord [Item8]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item8]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item9]] [true]
+onWord [Item9]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item9]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item10]] [true]
+onWord [Item10]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item10]] [true]
+endParagraph [[class]=[rssitemtitle]]
+endGroup [[class]=[rssfeed]]
+endMacroMarkerStandalone [testrss] [feed=file://feed6.xml|decoration=false]
+endDocument
+.#-----------------------------------------------------
+.expect|xhtml/1.0
+.#-----------------------------------------------------
+<div class="rssfeed"><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item1">Item1</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item2">Item2</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item3">Item3</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item4">Item4</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item5">Item5</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item6">Item6</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item7">Item7</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item8">Item8</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item9">Item9</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item10">Item10</a></span></p></div>

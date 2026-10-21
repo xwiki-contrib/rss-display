@@ -193,16 +193,19 @@ public class RssMacro extends AbstractBoxMacro<RssMacroParameters>
         // we avoid to put it in a class field, to avoid concurrent exceptions
         this.setFeed(feed);
 
-        if (parameters.isDecoration()) {
-            result = super.execute(parameters, content == null ? StringUtils.EMPTY : content, context);
-        } else {
-            result = Arrays.<Block>asList(new GroupBlock(Collections.singletonMap(CLASS_ATTRIBUTE, FEED_CLASS_VALUE)));
+        try {
+            if (parameters.isDecoration()) {
+                result = super.execute(parameters, content == null ? StringUtils.EMPTY : content, context);
+            } else {
+                result =
+                    Arrays.<Block>asList(new GroupBlock(Collections.singletonMap(CLASS_ATTRIBUTE, FEED_CLASS_VALUE)));
+            }
+
+            generateEntries(result.get(0), feed, parameters);
+        } finally {
+            // clean the context, even when the rendering fails
+            this.removeContextFeed();
         }
-
-        generateEntries(result.get(0), feed, parameters);
-
-        // clean the context
-        this.removeContextFeed();
         return result;
     }
 

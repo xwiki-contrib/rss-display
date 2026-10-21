@@ -64,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -140,6 +141,27 @@ class RssMacroTest
             this.macro.execute(parameters, null, null);
         });
         assertSame(expectedException, exception);
+    }
+
+    @Test
+    void executeRemovesFeedFromContextWhenRenderingFails() throws Exception
+    {
+        RssMacroParameters parameters = new RssMacroParameters();
+        parameters.setFeed("http://www.xwiki.org");
+        parameters.setContent(true);
+        parameters.setDecoration(false);
+
+        SyndFeed syndFeed = new SyndFeedInput().build(new XmlReader(new File("src/test/resources/feed1.xml")));
+        when(this.romeFeedFactory.createFeed(parameters)).thenReturn(syndFeed);
+        this.macro.setFeedFactory(this.romeFeedFactory);
+        when(this.plainTextParser.parse(any())).thenReturn(new XDOM(List.of(new ParagraphBlock(List.of()))));
+        RuntimeException expectedException = new RuntimeException("Error");
+        when(this.contentCleaner.cleanContent(any(String.class))).thenThrow(expectedException);
+
+        Throwable exception = assertThrows(RuntimeException.class, () -> this.macro.execute(parameters, null, null));
+
+        assertSame(expectedException, exception);
+        verify(this.context).removeProperty("RssMacro.feed");
     }
 
     @Test
@@ -235,5 +257,9 @@ class RssMacroTest
         assertEquals(
             new RawBlock("How do Americans get ready to work with Russians aboard the International Space "
                 + "Station?", Syntax.HTML_5_0), groupBlock.getChildren().get(0));
+
+        // The feed is only stored in the execution context while the macro executes.
+        verify(this.context).setProperty("RssMacro.feed", syndFeed);
+        verify(this.context).removeProperty("RssMacro.feed");
     }
 }

@@ -1,0 +1,38 @@
+.runTransformations
+.#-----------------------------------------------------
+.input|xwiki/2.0
+.# Verify that javascript: URLs in the feed links and image are not rendered as executable links.
+.#-----------------------------------------------------
+{{testrss feed="file://feed5.xml" image="true"/}}
+.#-----------------------------------------------------
+.expect|event/1.0
+.#-----------------------------------------------------
+beginDocument
+beginMacroMarkerStandalone [testrss] [feed=file://feed5.xml|image=true]
+beginGroup [[class]=[box rssfeed]]
+onImage [Typed = [true] Type = [url] Reference = [javascript:alert(2)]] [true]
+onNewLine
+beginParagraph [[class]=[rsschanneltitle]]
+beginLink [Typed = [true] Type = [url] Reference = [javascript:alert(1)]] [true]
+onWord [Test]
+onSpace
+onWord [Feed]
+onSpace
+onWord [5]
+endLink [Typed = [true] Type = [url] Reference = [javascript:alert(1)]] [true]
+beginLink [Typed = [true] Type = [url] Reference = [javascript:alert(1)]] [true]
+onImage [Typed = [true] Type = [url] Reference = [/xwiki/resources/icons/silk/feed.png]] [false]
+endLink [Typed = [true] Type = [url] Reference = [javascript:alert(1)]] [true]
+endParagraph [[class]=[rsschanneltitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [javascript:alert(3)]] [true]
+onWord [Item1]
+endLink [Typed = [true] Type = [url] Reference = [javascript:alert(3)]] [true]
+endParagraph [[class]=[rssitemtitle]]
+endGroup [[class]=[box rssfeed]]
+endMacroMarkerStandalone [testrss] [feed=file://feed5.xml|image=true]
+endDocument
+.#-----------------------------------------------------
+.expect|xhtml/1.0
+.#-----------------------------------------------------
+<div class="box rssfeed"><img data-xwiki-translated-attribute-src="javascript:alert(2)" class="wikimodel-freestanding" alt="javascript:alert(2)"/><br/><p class="rsschanneltitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" data-xwiki-translated-attribute-href="javascript:alert(1)">Test Feed 5</a></span><span class="wikiexternallink"><a class="wikimodel-freestanding" data-xwiki-translated-attribute-href="javascript:alert(1)"><img src="/xwiki/resources/icons/silk/feed.png" alt="/xwiki/resources/icons/silk/feed.png"/></a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" data-xwiki-translated-attribute-href="javascript:alert(3)">Item1</a></span></p></div>

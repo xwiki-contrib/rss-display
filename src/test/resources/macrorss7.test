@@ -1,0 +1,43 @@
+.runTransformations
+.#-----------------------------------------------------
+.input|xwiki/2.0
+.# Verify that the title parameter is displayed in addition to the channel title.
+.#-----------------------------------------------------
+{{testrss feed="file://feed2.xml" title="Custom **title**"/}}
+.#-----------------------------------------------------
+.expect|event/1.0
+.#-----------------------------------------------------
+beginDocument
+beginMacroMarkerStandalone [testrss] [feed=file://feed2.xml|title=Custom **title**]
+beginGroup [[class]=[box rssfeed]]
+beginMetaData [[non-generated-content]=[java.util.List<org.xwiki.rendering.block.Block>][parameter-name]=[title]]
+onWord [Custom]
+onSpace
+beginFormat [BOLD]
+onWord [title]
+endFormat [BOLD]
+endMetaData [[non-generated-content]=[java.util.List<org.xwiki.rendering.block.Block>][parameter-name]=[title]]
+beginParagraph [[class]=[rsschanneltitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/feed.xml]] [true]
+onWord [Test]
+onSpace
+onWord [Feed]
+onSpace
+onWord [2]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/feed.xml]] [true]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/feed.xml]] [true]
+onImage [Typed = [true] Type = [url] Reference = [/xwiki/resources/icons/silk/feed.png]] [false]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/feed.xml]] [true]
+endParagraph [[class]=[rsschanneltitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item1]] [true]
+onWord [Item1]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item1]] [true]
+endParagraph [[class]=[rssitemtitle]]
+endGroup [[class]=[box rssfeed]]
+endMacroMarkerStandalone [testrss] [feed=file://feed2.xml|title=Custom **title**]
+endDocument
+.#-----------------------------------------------------
+.expect|xhtml/1.0
+.#-----------------------------------------------------
+<div class="box rssfeed">Custom <strong>title</strong><p class="rsschanneltitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/feed.xml">Test Feed 2</a></span><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/feed.xml"><img src="/xwiki/resources/icons/silk/feed.png" alt="/xwiki/resources/icons/silk/feed.png"/></a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item1">Item1</a></span></p></div>

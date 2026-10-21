@@ -35,7 +35,7 @@
   <properties>
     <xwiki.issueManagement.jira.id>RSSDISPLAY</xwiki.issueManagement.jira.id>
     <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
-    <xwiki.jacoco.instructionRatio>0.83</xwiki.jacoco.instructionRatio>
+    <xwiki.jacoco.instructionRatio>0.89</xwiki.jacoco.instructionRatio>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>RSS Macro</xwiki.extension.name>
     <!-- Category to display by the Extension Manager -->
