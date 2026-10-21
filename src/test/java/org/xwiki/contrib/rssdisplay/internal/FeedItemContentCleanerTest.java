@@ -56,4 +56,39 @@ class FeedItemContentCleanerTest
                 "<iframe src=\"https://www.xwiki.org\" width=\"200\" height=\"400\">Iframe</iframe>")
         );
     }
+
+    @Test
+    void script()
+    {
+        // In restricted mode, scripts are converted to preformatted text so they're displayed but not executed.
+        assertEquals("<p>Text</p><pre>alert(1)</pre>", ((RawBlock) this.contentCleaner.cleanContent(
+            "<p>Text</p><script>alert(1)</script>")).getRawContent());
+    }
+
+    @Test
+    void eventHandlerAttribute()
+    {
+        assertEquals("<p><img src=\"https://www.xwiki.org/logo.png\" /></p>", ((RawBlock) this.contentCleaner
+            .cleanContent("<img src=\"https://www.xwiki.org/logo.png\" onerror=\"alert(1)\"/>")).getRawContent());
+    }
+
+    @Test
+    void html5Element()
+    {
+        assertEquals(new RawBlock("<figure><figcaption>Caption</figcaption></figure>", Syntax.HTML_5_0),
+            this.contentCleaner.cleanContent("<figure><figcaption>Caption</figcaption></figure>"));
+    }
+
+    @Test
+    void plainText()
+    {
+        assertEquals(new RawBlock("<p>Some text &amp; more</p>", Syntax.HTML_5_0),
+            this.contentCleaner.cleanContent("Some text & more"));
+    }
+
+    @Test
+    void emptyContent()
+    {
+        assertEquals(new RawBlock("", Syntax.HTML_5_0), this.contentCleaner.cleanContent(""));
+    }
 }

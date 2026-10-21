@@ -1,0 +1,49 @@
+.runTransformations
+.#-----------------------------------------------------
+.input|xwiki/2.0
+.# Verify a feed without channel link (plain text title, no feed icon), without image (image=true is ignored), with an item without description, and with an item title containing HTML (escaped).
+.#-----------------------------------------------------
+{{testrss feed="file://feed4.xml" content="true" image="true"/}}
+.#-----------------------------------------------------
+.expect|event/1.0
+.#-----------------------------------------------------
+beginDocument
+beginMacroMarkerStandalone [testrss] [feed=file://feed4.xml|content=true|image=true]
+beginGroup [[class]=[box rssfeed]]
+beginParagraph [[class]=[rsschanneltitle]]
+onWord [Test]
+onSpace
+onWord [Feed]
+onSpace
+onWord [4]
+endParagraph [[class]=[rsschanneltitle]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item1]] [true]
+onSpecialSymbol [<]
+onWord [script]
+onSpecialSymbol [>]
+onWord [alert]
+onSpecialSymbol [(]
+onWord [1]
+onSpecialSymbol [)]
+onSpecialSymbol [<]
+onSpecialSymbol [/]
+onWord [script]
+onSpecialSymbol [>]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item1]] [true]
+endParagraph [[class]=[rssitemtitle]]
+beginGroup [[class]=[rssitemdescription]]
+onRawText [<p>First item</p>] [html/5.0]
+endGroup [[class]=[rssitemdescription]]
+beginParagraph [[class]=[rssitemtitle]]
+beginLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item2]] [true]
+onWord [Item2]
+endLink [Typed = [true] Type = [url] Reference = [http://localhost/blog/item2]] [true]
+endParagraph [[class]=[rssitemtitle]]
+endGroup [[class]=[box rssfeed]]
+endMacroMarkerStandalone [testrss] [feed=file://feed4.xml|content=true|image=true]
+endDocument
+.#-----------------------------------------------------
+.expect|xhtml/1.0
+.#-----------------------------------------------------
+<div class="box rssfeed"><p class="rsschanneltitle">Test Feed 4</p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item1">&lt;script&gt;alert(1)&lt;/script&gt;</a></span></p><div class="rssitemdescription"><p>First item</p></div><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item2">Item2</a></span></p></div>

@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<rss version="2.0">
+  <channel>
+    <title>Test Feed 6</title>
+    <link>http://localhost/feed.xml</link>
+    <description>A pseudo-feed with more items than the default count</description>
+    <item>
+      <title>Item1</title>
+      <link>http://localhost/blog/item1</link>
+    </item>
+    <item>
+      <title>Item2</title>
+      <link>http://localhost/blog/item2</link>
+    </item>
+    <item>
+      <title>Item3</title>
+      <link>http://localhost/blog/item3</link>
+    </item>
+    <item>
+      <title>Item4</title>
+      <link>http://localhost/blog/item4</link>
+    </item>
+    <item>
+      <title>Item5</title>
+      <link>http://localhost/blog/item5</link>
+    </item>
+    <item>
+      <title>Item6</title>
+      <link>http://localhost/blog/item6</link>
+    </item>
+    <item>
+      <title>Item7</title>
+      <link>http://localhost/blog/item7</link>
+    </item>
+    <item>
+      <title>Item8</title>
+      <link>http://localhost/blog/item8</link>
+    </item>
+    <item>
+      <title>Item9</title>
+      <link>http://localhost/blog/item9</link>
+    </item>
+    <item>
+      <title>Item10</title>
+      <link>http://localhost/blog/item10</link>
+    </item>
+    <item>
+      <title>Item11</title>
+      <link>http://localhost/blog/item11</link>
+    </item>
+  </channel>
+</rss>
