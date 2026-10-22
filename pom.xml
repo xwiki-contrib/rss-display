@@ -29,7 +29,7 @@
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>rss-display</artifactId>
-  <version>15.7</version>
+  <version>15.8-SNAPSHOT</version>
   <name>RSS Display</name>
   <description>Displays the contents of a RSS feed</description>
   <properties>
@@ -47,7 +47,7 @@
     <connection>scm:git:git://github.com/xwiki-contrib/rss-display.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/rss-display.git</developerConnection>
     <url>https://github.com/xwiki-contrib/rss-display/tree/master</url>
-    <tag>rss-display-15.7</tag>
+    <tag>HEAD</tag>
   </scm>
   <developers>
     <developer>
