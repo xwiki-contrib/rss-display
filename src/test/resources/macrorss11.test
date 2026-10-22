@@ -1,0 +1,10 @@
+.runTransformations
+.#-----------------------------------------------------
+.input|xwiki/2.0
+.# Verify that the markup of Atom titles of type html and xhtml isn't displayed, while text titles are displayed as is.
+.#-----------------------------------------------------
+{{testrss feed="file://feed9.xml"/}}
+.#-----------------------------------------------------
+.expect|xhtml/1.0
+.#-----------------------------------------------------
+<div class="box rssfeed"><p class="rsschanneltitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/">Feed &amp; HTML title</a></span><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/"><img src="/xwiki/resources/icons/silk/feed.png" alt="/xwiki/resources/icons/silk/feed.png"/></a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/entry1">Tom &amp; Jerry news</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/entry2">XHTML title</a></span></p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/entry3">Using &lt;b&gt; &amp; &lt;i&gt;</a></span></p></div>

@@ -91,4 +91,23 @@ class FeedItemContentCleanerTest
     {
         assertEquals(new RawBlock("", Syntax.HTML_5_0), this.contentCleaner.cleanContent(""));
     }
+
+    @Test
+    void toPlainText()
+    {
+        assertEquals("Tom & Jerry news", this.contentCleaner.toPlainText("Tom &amp; Jerry <b>news</b>"));
+    }
+
+    @Test
+    void toPlainTextNormalizesWhitespace()
+    {
+        assertEquals("Multi line title", this.contentCleaner.toPlainText("<p>Multi\n  line</p>\n<p>title</p>"));
+    }
+
+    @Test
+    void toPlainTextWithScript()
+    {
+        // The text of a script is kept, since it is displayed as text and never executed.
+        assertEquals("Title alert(1)", this.contentCleaner.toPlainText("Title <script>alert(1)</script>"));
+    }
 }

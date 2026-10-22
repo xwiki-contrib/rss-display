@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.rendering.block.Block;
@@ -59,17 +60,7 @@ public class FeedItemContentCleaner
      */
     public Block cleanContent(String source)
     {
-        HTMLCleanerConfiguration cleanerConfiguration = this.htmlCleaner.getDefaultConfiguration();
-        Map<String, String> parameters = new HashMap<>(cleanerConfiguration.getParameters());
-
-        // Just always use HTML 5 as this is what browsers parse.
-        parameters.put(HTMLCleanerConfiguration.HTML_VERSION, "5");
-        // Don't trust remote content.
-        parameters.put(HTMLCleanerConfiguration.RESTRICTED, "true");
-
-        cleanerConfiguration.setParameters(parameters);
-
-        Document document = this.htmlCleaner.clean(new StringReader(source), cleanerConfiguration);
+        Document document = clean(source);
 
         // Remove the HTML envelope since this macro is only a fragment of a page which will already have an
         // HTML envelope when rendered. We remove it so that the HTML <head> tag isn't output.
@@ -84,5 +75,32 @@ public class FeedItemContentCleaner
         // the 6 chars from "<html>".
         String resultContent = cleanedContent.substring(7, cleanedContent.length() - 8);
         return new RawBlock(resultContent, Syntax.HTML_5_0);
+    }
+
+    /**
+     * Converts HTML, such as an Atom title of type {@code html} or {@code xhtml}, to the text it displays.
+     *
+     * @param source the HTML to convert
+     * @return the text of the HTML, without markup, with the entities decoded and the whitespace normalized
+     * @since 15.7
+     */
+    public String toPlainText(String source)
+    {
+        return StringUtils.normalizeSpace(clean(source).getDocumentElement().getTextContent());
+    }
+
+    private Document clean(String source)
+    {
+        HTMLCleanerConfiguration cleanerConfiguration = this.htmlCleaner.getDefaultConfiguration();
+        Map<String, String> parameters = new HashMap<>(cleanerConfiguration.getParameters());
+
+        // Just always use HTML 5 as this is what browsers parse.
+        parameters.put(HTMLCleanerConfiguration.HTML_VERSION, "5");
+        // Don't trust remote content.
+        parameters.put(HTMLCleanerConfiguration.RESTRICTED, "true");
+
+        cleanerConfiguration.setParameters(parameters);
+
+        return this.htmlCleaner.clean(new StringReader(source), cleanerConfiguration);
     }
 }
