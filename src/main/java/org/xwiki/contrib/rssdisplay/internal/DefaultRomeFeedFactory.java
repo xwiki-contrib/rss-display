@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.xwiki.contrib.rssdisplay.RssMacroParameters;
 import org.xwiki.rendering.macro.MacroExecutionException;
 
+import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
@@ -42,7 +45,8 @@ import com.sun.syndication.io.XmlReader;
  * Factory implementation using Rome to return the feed's data.
  * <p>
  * Only http and https feeds hosted on public addresses are fetched, redirects included, and fetching a feed is
- * bounded in time and size.
+ * bounded in time and size. The relative links of the feed and of its entries are resolved against the URL the feed
+ * is retrieved from.
  *
  * @version $Id$
  * @since 1.9
@@ -122,9 +126,18 @@ public class DefaultRomeFeedFactory implements RomeFeedFactory
 
         SyndFeedInput syndFeedInput = new SyndFeedInput();
 
+        long deadline = System.currentTimeMillis() + this.maxDuration;
         SyndFeed feed;
-        try (InputStream feedStream = openFeedStream(parameters.getFeedURL())) {
-            feed = syndFeedInput.build(new XmlReader(feedStream, true, parameters.getEncoding()));
+        URL baseURL;
+        try {
+            URLConnection connection = openConnection(parameters.getFeedURL(), deadline);
+            // The URL the feed is retrieved from, redirects included, is the base of its relative links.
+            baseURL = connection.getURL();
+            try (InputStream feedStream =
+                new LimitedInputStream(connection.getInputStream(), deadline, this.maxSize))
+            {
+                feed = syndFeedInput.build(new XmlReader(feedStream, true, parameters.getEncoding()));
+            }
         } catch (MacroExecutionException e) {
             throw e;
         } catch (Exception e) {
@@ -138,12 +151,13 @@ public class DefaultRomeFeedFactory implements RomeFeedFactory
                 parameters.getFeedURL()));
         }
 
+        resolveLinks(feed, baseURL);
+
         return feed;
     }
 
-    private InputStream openFeedStream(URL feedURL) throws IOException, MacroExecutionException
+    private URLConnection openConnection(URL feedURL, long deadline) throws IOException, MacroExecutionException
     {
-        long deadline = System.currentTimeMillis() + this.maxDuration;
         URL url = feedURL;
         for (int redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
             checkDeadline(deadline);
@@ -160,13 +174,47 @@ public class DefaultRomeFeedFactory implements RomeFeedFactory
                 redirectURL = getRedirectURL((HttpURLConnection) connection);
             }
             if (redirectURL == null) {
-                return new LimitedInputStream(connection.getInputStream(), deadline, this.maxSize);
+                return connection;
             }
             url = redirectURL;
         }
 
         throw new MacroExecutionException(MessageFormat.format("Too many redirects when trying to reach [{0}]",
             feedURL));
+    }
+
+    /**
+     * Makes the relative links of the feed and of its entries absolute, so that they don't get resolved against the
+     * wiki page displaying the feed.
+     *
+     * @param feed the feed
+     * @param baseURL the URL the feed was retrieved from
+     */
+    private static void resolveLinks(SyndFeed feed, URL baseURL)
+    {
+        feed.setLink(resolveLink(feed.getLink(), baseURL));
+        for (Object item : feed.getEntries()) {
+            SyndEntry entry = (SyndEntry) item;
+            entry.setLink(resolveLink(entry.getLink(), baseURL));
+        }
+    }
+
+    private static String resolveLink(String link, URL baseURL)
+    {
+        String result = link;
+        // A blank link means there's no link, it doesn't refer to the feed itself.
+        if (StringUtils.isNotBlank(link)) {
+            try {
+                URI uri = new URI(link);
+                if (!uri.isAbsolute()) {
+                    result = baseURL.toURI().resolve(uri).toString();
+                }
+            } catch (URISyntaxException e) {
+                // Not a valid URI: there's no safe way to resolve it, so it's kept as is.
+                LOGGER.debug("Failed to resolve the feed link [{}] against [{}]", link, baseURL, e);
+            }
+        }
+        return result;
     }
 
     private URL getRedirectURL(HttpURLConnection connection) throws IOException

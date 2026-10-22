@@ -29,10 +29,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +44,7 @@ import org.xwiki.rendering.macro.MacroExecutionException;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,6 +113,8 @@ class DefaultRomeFeedFactoryTest
         });
         this.server.createContext("/redirect", exchange -> redirect(exchange, this.baseURL + "/feed"));
         this.server.createContext("/redirectInternal", exchange -> redirect(exchange, "http://10.255.255.1/feed"));
+        this.server.createContext("/redirectCustom",
+            exchange -> redirect(exchange, this.baseURL + "/custom/blog/feed.xml"));
         this.server.createContext("/redirectLoop", exchange -> redirect(exchange, this.baseURL + "/redirectLoop"));
         this.server.createContext("/hang", exchange -> {
             exchange.sendResponseHeaders(200, 0);
@@ -182,6 +187,24 @@ class DefaultRomeFeedFactoryTest
         parameters.setEncoding("ISO-8859-1");
 
         assertEquals("Caf\u00e9", this.factory.createFeed(parameters).getTitle());
+    }
+
+    @Test
+    void createFeedResolvesRelativeLinks() throws Exception
+    {
+        this.customBody = ("<?xml version=\"1.0\"?><feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            + "<title>Test</title><link href=\"/\"/><id>urn:test</id><updated>2024-01-01T00:00:00Z</updated>"
+            + entry("posts/1") + entry("/posts/2") + entry("//cdn.example.org/3") + entry("https://example.org/4")
+            + entry("javascript:alert(1)") + entry("invalid uri") + entry("") + "</feed>").getBytes(StandardCharsets.UTF_8);
+
+        // The links are resolved against the URL the feed is retrieved from, after following the redirects.
+        SyndFeed feed = this.factory.createFeed(parameters(this.baseURL + "/redirectCustom"));
+
+        assertEquals(this.baseURL + "/", feed.getLink());
+        List<String> links = ((List<?>) feed.getEntries()).stream().map(entry -> ((SyndEntry) entry).getLink())
+            .collect(Collectors.toList());
+        assertEquals(List.of(this.baseURL + "/custom/blog/posts/1", this.baseURL + "/posts/2",
+            "http://cdn.example.org/3", "https://example.org/4", "javascript:alert(1)", "invalid uri", ""), links);
     }
 
     @Test
@@ -315,6 +338,12 @@ class DefaultRomeFeedFactoryTest
             () -> this.factory.createFeed(parameters(this.baseURL + "/huge")));
 
         assertEquals("Failed to retrieve the feed from [" + this.baseURL + "/huge]", exception.getMessage());
+    }
+
+    private static String entry(String link)
+    {
+        return "<entry><title>Entry</title><link href=\"" + link + "\"/><id>urn:" + link.hashCode()
+            + "</id><updated>2024-01-01T00:00:00Z</updated></entry>";
     }
 
     private static RssMacroParameters parameters(String feed) throws Exception
