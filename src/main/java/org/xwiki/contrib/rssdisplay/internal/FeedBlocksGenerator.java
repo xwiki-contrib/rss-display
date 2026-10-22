@@ -92,7 +92,7 @@ public class FeedBlocksGenerator
      * @param feed the RSS feed data
      * @return the list of blocks making the RSS Box title
      */
-    public List<? extends Block> generateBoxTitle(String cssClass, SyndFeed feed)
+    public List<Block> generateBoxTitle(String cssClass, SyndFeed feed)
     {
         List<Block> titleBlocks;
         String title = getTitle(feed.getTitleEx(), feed.getTitle());
