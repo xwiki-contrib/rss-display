@@ -19,7 +19,6 @@
  */
 package org.xwiki.contrib.rssdisplay.internal;
 
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,25 +29,18 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
-import org.xwiki.bridge.SkinAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.context.Execution;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.GroupBlock;
-import org.xwiki.rendering.block.ImageBlock;
-import org.xwiki.rendering.block.LinkBlock;
-import org.xwiki.rendering.block.ParagraphBlock;
 import org.xwiki.rendering.listener.reference.ResourceReference;
 import org.xwiki.rendering.listener.reference.ResourceType;
 import org.xwiki.rendering.macro.MacroExecutionException;
 import org.xwiki.rendering.macro.box.AbstractBoxMacro;
 import org.xwiki.rendering.macro.descriptor.DefaultContentDescriptor;
 import org.xwiki.contrib.rssdisplay.RssMacroParameters;
-import org.xwiki.rendering.parser.ParseException;
-import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.transformation.MacroTransformationContext;
 
-import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 
 /**
@@ -77,34 +69,16 @@ public class RssMacro extends AbstractBoxMacro<RssMacroParameters>
     private static final String DESCRIPTION = "Output latest feed entries from a RSS feed.";
 
     /**
-     * The relative skin path of the feed icon to be displayed in the channel title.
-     */
-    private static final String FEED_ICON_RESOURCE_PATH = "icons/silk/feed.png";
-
-    /**
-     * Used to get the RSS icon.
-     */
-    @Inject
-    private SkinAccessBridge skinAccessBridge;
-
-    /**
-     * Needed to parse the ordinary text.
-     */
-    @Inject
-    @Named("plain/1.0")
-    private Parser plainTextParser;
-
-    /**
      * Needed to keep the feed information.
      */
     @Inject
     private Execution execution;
 
     /**
-     * Needed to clean the content.
+     * Generates the blocks displaying the feed.
      */
     @Inject
-    private FeedItemContentCleaner contentCleaner;
+    private FeedBlocksGenerator feedBlocksGenerator;
 
     /**
      * Create a Feed object from a feed specified as a URL.
@@ -170,7 +144,7 @@ public class RssMacro extends AbstractBoxMacro<RssMacroParameters>
         List<? extends Block> blockTitle = super.getBlockTitle(parameters, content, context);
 
         if (blockTitle == null) {
-            return generateBoxTitle("rsschanneltitle", getFeed());
+            return this.feedBlocksGenerator.generateBoxTitle("rsschanneltitle", getFeed());
         } else {
             return blockTitle;
         }
@@ -201,7 +175,7 @@ public class RssMacro extends AbstractBoxMacro<RssMacroParameters>
                     Arrays.<Block>asList(new GroupBlock(Collections.singletonMap(CLASS_ATTRIBUTE, FEED_CLASS_VALUE)));
             }
 
-            generateEntries(result.get(0), feed, parameters);
+            this.feedBlocksGenerator.generateEntries(result.get(0), feed, parameters);
         } finally {
             // clean the context, even when the rendering fails
             this.removeContextFeed();
@@ -217,111 +191,10 @@ public class RssMacro extends AbstractBoxMacro<RssMacroParameters>
     }
 
     /**
-     * Renders the RSS's title.
-     * 
-     * @param cssClass the CSS sheet
-     * @param feed the RSS feed data
-     * @return the list of blocks making the RSS Box title
-     */
-    private List< ? extends Block> generateBoxTitle(String cssClass, SyndFeed feed)
-    {
-        List<Block> titleBlocks;
-
-        if (feed.getLink() == null) {
-            titleBlocks = parsePlainText(feed.getTitle());
-        } else {
-            // Title link.
-            ResourceReference titleResourceReference = new ResourceReference(feed.getLink(), ResourceType.URL);
-
-            // Title text link.
-            Block titleTextLinkBlock = new LinkBlock(parsePlainText(feed.getTitle()), titleResourceReference, true);
-
-            // Rss icon.
-            String imagePath = this.skinAccessBridge.getSkinFile(FEED_ICON_RESOURCE_PATH);
-            ImageBlock imageBlock = new ImageBlock(new ResourceReference(imagePath, ResourceType.URL), false);
-
-            // Title rss icon link.
-            Block titleImageLinkBlock = new LinkBlock(Arrays.asList(imageBlock), titleResourceReference, true);
-
-            titleBlocks = Arrays.asList(titleTextLinkBlock, titleImageLinkBlock);
-        }
-        ParagraphBlock titleBlock = new ParagraphBlock(titleBlocks);
-        titleBlock.setParameter(CLASS_ATTRIBUTE, cssClass);
-
-        return Collections.singletonList(titleBlock);
-    }
-
-    /**
-     * Renders the given RSS's entries.
-     * 
-     * @param parentBlock the parent Block to which the output is going to be added
-     * @param feed the RSS Channel we retrieved via the Feed URL
-     * @param parameters our parameter helper object
-     * @throws MacroExecutionException if the content cannot be rendered
-     */
-    private void generateEntries(Block parentBlock, SyndFeed feed, RssMacroParameters parameters)
-    {
-        int maxElements = parameters.getCount();
-        int count = 0;
-
-        for (Object item : feed.getEntries()) {
-            ++count;
-            if (count > maxElements) {
-                break;
-            }
-            SyndEntry entry = (SyndEntry) item;
-
-            ResourceReference titleResourceReference = new ResourceReference(entry.getLink(), ResourceType.URL);
-            Block titleBlock = new LinkBlock(parsePlainText(entry.getTitle()), titleResourceReference, true);
-            ParagraphBlock paragraphTitleBlock = new ParagraphBlock(Collections.singletonList(titleBlock));
-            paragraphTitleBlock.setParameter(CLASS_ATTRIBUTE, "rssitemtitle");
-            parentBlock.addChild(paragraphTitleBlock);
-
-            if (parameters.isContent() && entry.getDescription() != null) {
-                // We are wrapping the feed entry content in a HTML macro, not considering what the declared content
-                // is, because some feed will declare text while they actually contain HTML.
-                // See http://stuffthathappens.com/blog/2007/10/29/i-hate-rss/
-                // A case where doing this might hurt is if a feed declares "text" and has any XML inside it does
-                // not want to be interpreted as such, but displayed as is instead. But this certainly is too rare
-                // compared to mis-formed feeds that say text while they want to say HTML.
-                String content = entry.getDescription().getValue();
-                parentBlock.addChild(
-                    new GroupBlock(
-                        Collections.singletonList(this.contentCleaner.cleanContent(content)),
-                        Collections.singletonMap(CLASS_ATTRIBUTE, "rssitemdescription")
-                    )
-                );
-            }
-        }
-    }
-
-    /**
      * @param romeFeedFactory a custom implementation to use instead of the default, useful for tests
      */
     protected void setFeedFactory(RomeFeedFactory romeFeedFactory)
     {
         this.romeFeedFactory = romeFeedFactory;
-    }
-
-    /**
-     * Convenience method to not have to handle exceptions in several places.
-     *
-     * @param content the content to parse as plain text
-     * @return the parsed Blocks
-     * @since 2.0M3
-     */
-    private List<Block> parsePlainText(String content)
-    {
-        if (StringUtils.isEmpty(content)) {
-            return Collections.emptyList();
-        }
-
-        try {
-            return this.plainTextParser.parse(new StringReader(content)).getChildren().get(0).getChildren();
-        } catch (ParseException e) {
-            // This shouldn't happen since the parser cannot throw an exception since the source is a memory
-            // String.
-            throw new RuntimeException("Failed to parse [" + content + "] as plain text", e);
-        }
     }
 }

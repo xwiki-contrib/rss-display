@@ -29,6 +29,7 @@ import javax.inject.Named;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.xwiki.bridge.SkinAccessBridge;
 import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.properties.ConverterManager;
@@ -75,7 +76,8 @@ import static org.mockito.Mockito.when;
  */
 @ComponentTest
 @ComponentList({
-    DefaultBeanManager.class
+    DefaultBeanManager.class,
+    FeedBlocksGenerator.class
 })
 class RssMacroTest
 {
@@ -84,6 +86,9 @@ class RssMacroTest
 
     @MockComponent
     private Execution execution;
+
+    @MockComponent
+    private SkinAccessBridge skinAccessBridge;
 
     @MockComponent
     private ExecutionContext context;

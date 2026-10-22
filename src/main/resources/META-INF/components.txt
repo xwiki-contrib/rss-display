@@ -1,2 +1,3 @@
 org.xwiki.contrib.rssdisplay.internal.RssMacro
 org.xwiki.contrib.rssdisplay.internal.FeedItemContentCleaner
+org.xwiki.contrib.rssdisplay.internal.FeedBlocksGenerator
