@@ -97,7 +97,7 @@ public class FeedBlocksGenerator
         List<Block> titleBlocks;
         String title = getTitle(feed.getTitleEx(), feed.getTitle());
 
-        if (feed.getLink() == null) {
+        if (StringUtils.isBlank(feed.getLink())) {
             titleBlocks = parsePlainText(title);
         } else {
             // Title link.
@@ -140,10 +140,13 @@ public class FeedBlocksGenerator
             }
             SyndEntry entry = (SyndEntry) item;
 
-            ResourceReference titleResourceReference = new ResourceReference(entry.getLink(), ResourceType.URL);
-            Block titleBlock = new LinkBlock(parsePlainText(getTitle(entry.getTitleEx(), entry.getTitle())),
-                titleResourceReference, true);
-            ParagraphBlock paragraphTitleBlock = new ParagraphBlock(Collections.singletonList(titleBlock));
+            List<Block> titleBlocks = parsePlainText(getTitle(entry.getTitleEx(), entry.getTitle()));
+            if (StringUtils.isNotBlank(entry.getLink())) {
+                ResourceReference titleResourceReference =
+                    new ResourceReference(entry.getLink(), ResourceType.URL);
+                titleBlocks = Collections.singletonList(new LinkBlock(titleBlocks, titleResourceReference, true));
+            }
+            ParagraphBlock paragraphTitleBlock = new ParagraphBlock(titleBlocks);
             paragraphTitleBlock.setParameter(CLASS_ATTRIBUTE, "rssitemtitle");
             parentBlock.addChild(paragraphTitleBlock);
 
