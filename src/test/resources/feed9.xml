@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="html">Feed &amp;amp; &lt;i&gt;HTML&lt;/i&gt; title</title>
+  <link href="http://localhost/"/>
+  <id>urn:test:feed9</id>
+  <updated>2024-01-01T00:00:00Z</updated>
+  <entry>
+    <title type="html">Tom &amp;amp; Jerry &lt;b&gt;news&lt;/b&gt;</title>
+    <link href="http://localhost/blog/entry1"/>
+    <id>urn:test:entry1</id>
+    <updated>2024-01-01T00:00:00Z</updated>
+  </entry>
+  <entry>
+    <title type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">XHTML <b>title</b></div></title>
+    <link href="http://localhost/blog/entry2"/>
+    <id>urn:test:entry2</id>
+    <updated>2024-01-01T00:00:00Z</updated>
+  </entry>
+  <entry>
+    <title type="text">Using &lt;b&gt; &amp; &lt;i&gt;</title>
+    <link href="http://localhost/blog/entry3"/>
+    <id>urn:test:entry3</id>
+    <updated>2024-01-01T00:00:00Z</updated>
+  </entry>
+</feed>

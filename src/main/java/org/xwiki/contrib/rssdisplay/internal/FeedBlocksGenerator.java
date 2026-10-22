@@ -95,15 +95,16 @@ public class FeedBlocksGenerator
     public List<? extends Block> generateBoxTitle(String cssClass, SyndFeed feed)
     {
         List<Block> titleBlocks;
+        String title = getTitle(feed.getTitleEx(), feed.getTitle());
 
         if (feed.getLink() == null) {
-            titleBlocks = parsePlainText(feed.getTitle());
+            titleBlocks = parsePlainText(title);
         } else {
             // Title link.
             ResourceReference titleResourceReference = new ResourceReference(feed.getLink(), ResourceType.URL);
 
             // Title text link.
-            Block titleTextLinkBlock = new LinkBlock(parsePlainText(feed.getTitle()), titleResourceReference, true);
+            Block titleTextLinkBlock = new LinkBlock(parsePlainText(title), titleResourceReference, true);
 
             // Rss icon.
             String imagePath = this.skinAccessBridge.getSkinFile(FEED_ICON_RESOURCE_PATH);
@@ -140,7 +141,8 @@ public class FeedBlocksGenerator
             SyndEntry entry = (SyndEntry) item;
 
             ResourceReference titleResourceReference = new ResourceReference(entry.getLink(), ResourceType.URL);
-            Block titleBlock = new LinkBlock(parsePlainText(entry.getTitle()), titleResourceReference, true);
+            Block titleBlock = new LinkBlock(parsePlainText(getTitle(entry.getTitleEx(), entry.getTitle())),
+                titleResourceReference, true);
             ParagraphBlock paragraphTitleBlock = new ParagraphBlock(Collections.singletonList(titleBlock));
             paragraphTitleBlock.setParameter(CLASS_ATTRIBUTE, "rssitemtitle");
             parentBlock.addChild(paragraphTitleBlock);
@@ -161,6 +163,23 @@ public class FeedBlocksGenerator
                 );
             }
         }
+    }
+
+    /**
+     * Atom titles can be HTML (type {@code html} or {@code xhtml}), in which case their markup must not be displayed.
+     *
+     * @param titleEx the title, with its type, or {@code null} if the feed doesn't provide it
+     * @param title the title
+     * @return the text of the title to display
+     */
+    private String getTitle(SyndContent titleEx, String title)
+    {
+        if (titleEx != null && titleEx.getValue() != null
+            && StringUtils.containsIgnoreCase(titleEx.getType(), "html"))
+        {
+            return this.contentCleaner.toPlainText(titleEx.getValue());
+        }
+        return title;
     }
 
     /**
