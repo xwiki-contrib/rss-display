@@ -214,9 +214,20 @@ class RssMacroTest
 
         assertTrue(children.get(1) instanceof NewLineBlock);
 
-        // checking first paragraph and first group presenting channel description
-        assertTrue(children.get(2) instanceof ParagraphBlock);
-        ParagraphBlock paragraphBlock = (ParagraphBlock) children.get(2);
+        assertChannelTitle(children.get(2));
+        assertEquals(expectedBlockList.get(0), children.get(3));
+        assertItemTitle(children.get(4));
+        assertItemDescription(children.get(5));
+
+        // The feed is only stored in the execution context while the macro executes.
+        verify(this.context).setProperty("RssMacro.feed", syndFeed);
+        verify(this.context).removeProperty("RssMacro.feed");
+    }
+
+    private void assertChannelTitle(Block block)
+    {
+        assertTrue(block instanceof ParagraphBlock);
+        ParagraphBlock paragraphBlock = (ParagraphBlock) block;
         assertEquals("rsschanneltitle", paragraphBlock.getParameter("class"));
 
         assertEquals(2, paragraphBlock.getChildren().size());
@@ -233,33 +244,30 @@ class RssMacroTest
         assertEquals(ResourceType.URL, secondLink.getReference().getType());
         assertEquals(1, secondLink.getChildren().size());
         assertTrue(secondLink.getChildren().get(0) instanceof ImageBlock);
+    }
 
-        assertEquals(expectedBlockList.get(0), children.get(3));
-
-        // checking second paragraph presenting first item link
-        assertTrue(children.get(4) instanceof ParagraphBlock);
-        paragraphBlock = (ParagraphBlock) children.get(4);
+    private void assertItemTitle(Block block)
+    {
+        assertTrue(block instanceof ParagraphBlock);
+        ParagraphBlock paragraphBlock = (ParagraphBlock) block;
         assertEquals("rssitemtitle", paragraphBlock.getParameter("class"));
         assertEquals(1, paragraphBlock.getChildren().size());
         assertTrue(paragraphBlock.getChildren().get(0) instanceof LinkBlock);
-        firstLink = (LinkBlock) paragraphBlock.getChildren().get(0);
-        assertEquals("http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp",
-            firstLink.getReference().getReference());
-        assertEquals(ResourceType.URL, firstLink.getReference().getType());
-        assertEquals(1, firstLink.getChildren().size());
-        assertEquals(new WordBlock("foo"), firstLink.getChildren().get(0));
+        LinkBlock link = (LinkBlock) paragraphBlock.getChildren().get(0);
+        assertEquals("http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp", link.getReference().getReference());
+        assertEquals(ResourceType.URL, link.getReference().getType());
+        assertEquals(1, link.getChildren().size());
+        assertEquals(new WordBlock("foo"), link.getChildren().get(0));
+    }
 
-        // checking second group block presenting first item description
-        assertTrue(children.get(5) instanceof GroupBlock);
-        groupBlock = (GroupBlock) children.get(5);
+    private void assertItemDescription(Block block)
+    {
+        assertTrue(block instanceof GroupBlock);
+        GroupBlock groupBlock = (GroupBlock) block;
         assertEquals("rssitemdescription", groupBlock.getParameter("class"));
         assertEquals(1, groupBlock.getChildren().size());
         assertEquals(
             new RawBlock("How do Americans get ready to work with Russians aboard the International Space "
                 + "Station?", Syntax.HTML_5_0), groupBlock.getChildren().get(0));
-
-        // The feed is only stored in the execution context while the macro executes.
-        verify(this.context).setProperty("RssMacro.feed", syndFeed);
-        verify(this.context).removeProperty("RssMacro.feed");
     }
 }

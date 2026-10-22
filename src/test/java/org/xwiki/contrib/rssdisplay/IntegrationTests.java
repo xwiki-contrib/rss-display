@@ -19,14 +19,13 @@
  */
 package org.xwiki.contrib.rssdisplay;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JUnit4Mockery;
-import org.junit.runner.RunWith;
 import org.xwiki.bridge.SkinAccessBridge;
-import org.xwiki.component.descriptor.DefaultComponentDescriptor;
-import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.rendering.test.integration.RenderingTestSuite;
+import org.xwiki.rendering.test.integration.junit5.RenderingTests;
+import org.xwiki.test.annotation.AllComponents;
+import org.xwiki.test.mockito.MockitoComponentManager;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * Run all tests found in {@code *.test} files located in the classpath. These {@code *.test} files must follow the
@@ -35,22 +34,13 @@ import org.xwiki.rendering.test.integration.RenderingTestSuite;
  * @version $Id$
  * @since 3.0RC1
  */
-@RunWith(RenderingTestSuite.class)
-public class IntegrationTests
+@AllComponents
+public class IntegrationTests implements RenderingTests
 {
-    @RenderingTestSuite.Initialized
-    public void initialize(ComponentManager componentManager) throws Exception
+    @RenderingTests.Initialized
+    public void initialize(MockitoComponentManager componentManager) throws Exception
     {
-        Mockery mockery = new JUnit4Mockery();
-
-        final SkinAccessBridge mockSkinAccessBridge = mockery.mock(SkinAccessBridge.class);
-        DefaultComponentDescriptor<SkinAccessBridge> descriptorSAB = new DefaultComponentDescriptor<SkinAccessBridge>();
-        descriptorSAB.setRoleType(SkinAccessBridge.class);
-        componentManager.registerComponent(descriptorSAB, mockSkinAccessBridge);
-
-        mockery.checking(new Expectations() {{
-            allowing(mockSkinAccessBridge).getSkinFile(with(any(String.class)));
-                will(returnValue("/xwiki/resources/icons/silk/feed.png"));
-        }});
+        SkinAccessBridge skinAccessBridge = componentManager.registerMockComponent(SkinAccessBridge.class);
+        when(skinAccessBridge.getSkinFile(any(String.class))).thenReturn("/xwiki/resources/icons/silk/feed.png");
     }
 }
