@@ -29,8 +29,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +71,11 @@ class DefaultRomeFeedFactoryTest
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
+    /**
+     * Released when the test ends, so that the handlers simulating a slow server stop right away.
+     */
+    private final CountDownLatch testEnded = new CountDownLatch(1);
+
     private HttpServer server;
 
     private String baseURL;
@@ -106,7 +113,7 @@ class DefaultRomeFeedFactoryTest
         this.server.createContext("/redirectLoop", exchange -> redirect(exchange, this.baseURL + "/redirectLoop"));
         this.server.createContext("/hang", exchange -> {
             exchange.sendResponseHeaders(200, 0);
-            sleep(10000);
+            waitUnlessTestEnded(10000);
         });
         this.server.createContext("/trickle", exchange -> {
             exchange.sendResponseHeaders(200, 0);
@@ -115,7 +122,9 @@ class DefaultRomeFeedFactoryTest
                 for (int i = 0; i < 1000; i++) {
                     out.write(' ');
                     out.flush();
-                    sleep(TIMEOUT / 5);
+                    if (waitUnlessTestEnded(TIMEOUT / 5)) {
+                        break;
+                    }
                 }
             }
         });
@@ -138,6 +147,7 @@ class DefaultRomeFeedFactoryTest
     @AfterEach
     void tearDown()
     {
+        this.testEnded.countDown();
         this.server.stop(0);
         this.executor.shutdownNow();
     }
@@ -329,12 +339,17 @@ class DefaultRomeFeedFactoryTest
         exchange.close();
     }
 
-    private static void sleep(long millis)
+    /**
+     * @param millis the maximum time to wait, in milliseconds
+     * @return {@code true} if the test ended (or the thread was interrupted) before the time elapsed
+     */
+    private boolean waitUnlessTestEnded(long millis)
     {
         try {
-            Thread.sleep(millis);
+            return this.testEnded.await(millis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            return true;
         }
     }
 }
