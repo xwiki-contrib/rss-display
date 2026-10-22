@@ -1,0 +1,13 @@
+.runTransformations
+.#-----------------------------------------------------
+.input|xwiki/2.0
+.# Verify that the entry content is displayed when the entry has no description (Atom content, RSS content:encoded),
+.# that the description is preferred when there are both, and that an empty description isn't displayed.
+.#-----------------------------------------------------
+{{testrss feed="file://feed7.xml" content="true" decoration="false"/}}
+
+{{testrss feed="file://feed8.xml" content="true" decoration="false"/}}
+.#-----------------------------------------------------
+.expect|xhtml/1.0
+.#-----------------------------------------------------
+<div class="rssfeed"><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/entry1">Entry1</a></span></p><div class="rssitemdescription"><p>Entry1 content</p></div><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/entry2">Entry2</a></span></p><div class="rssitemdescription"><p>Entry2 summary</p></div></div><div class="rssfeed"><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item1">Item1</a></span></p><div class="rssitemdescription"><p>Item1 content</p></div><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item2">Item2</a></span></p></div>

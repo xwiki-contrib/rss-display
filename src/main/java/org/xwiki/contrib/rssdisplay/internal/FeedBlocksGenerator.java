@@ -42,6 +42,7 @@ import org.xwiki.rendering.listener.reference.ResourceType;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.parser.Parser;
 
+import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 
@@ -144,14 +145,14 @@ public class FeedBlocksGenerator
             paragraphTitleBlock.setParameter(CLASS_ATTRIBUTE, "rssitemtitle");
             parentBlock.addChild(paragraphTitleBlock);
 
-            if (parameters.isContent() && entry.getDescription() != null) {
+            String content = parameters.isContent() ? getEntryContent(entry) : null;
+            if (content != null) {
                 // We are wrapping the feed entry content in a HTML macro, not considering what the declared content
                 // is, because some feed will declare text while they actually contain HTML.
                 // See http://stuffthathappens.com/blog/2007/10/29/i-hate-rss/
                 // A case where doing this might hurt is if a feed declares "text" and has any XML inside it does
                 // not want to be interpreted as such, but displayed as is instead. But this certainly is too rare
                 // compared to mis-formed feeds that say text while they want to say HTML.
-                String content = entry.getDescription().getValue();
                 parentBlock.addChild(
                     new GroupBlock(
                         Collections.singletonList(this.contentCleaner.cleanContent(content)),
@@ -160,6 +161,30 @@ public class FeedBlocksGenerator
                 );
             }
         }
+    }
+
+    /**
+     * Many feeds only provide the entry content, without description: Atom entries having a {@code content} element
+     * but no {@code summary} one, and RSS items having a {@code content:encoded} element but no {@code description}
+     * one.
+     *
+     * @param entry the feed entry
+     * @return the entry description if it isn't blank, otherwise its first non-blank content, or {@code null} when
+     *     the entry has neither
+     */
+    private String getEntryContent(SyndEntry entry)
+    {
+        SyndContent description = entry.getDescription();
+        if (description != null && StringUtils.isNotBlank(description.getValue())) {
+            return description.getValue();
+        }
+        for (Object item : entry.getContents()) {
+            String value = ((SyndContent) item).getValue();
+            if (StringUtils.isNotBlank(value)) {
+                return value;
+            }
+        }
+        return null;
     }
 
     /**
