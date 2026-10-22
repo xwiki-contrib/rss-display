@@ -1,0 +1,10 @@
+.runTransformations
+.#-----------------------------------------------------
+.input|xwiki/2.0
+.# Verify that the title of a feed or of an entry without (or with a blank) link is displayed as plain text.
+.#-----------------------------------------------------
+{{testrss feed="file://feed10.xml"/}}
+.#-----------------------------------------------------
+.expect|xhtml/1.0
+.#-----------------------------------------------------
+<div class="box rssfeed"><p class="rsschanneltitle">Test Feed 10</p><p class="rssitemtitle">Item1</p><p class="rssitemtitle">Item2</p><p class="rssitemtitle"><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://localhost/blog/item3">Item3</a></span></p></div>
